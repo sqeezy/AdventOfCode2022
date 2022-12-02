@@ -33,4 +33,6 @@ let partTwoResult = elvesWithCalories |> List.take 3 |> List.sumBy (fun (Calorie
 
 // find the calorie richtest elf
 printf $"{partOneResult}"
+
+// find sum of three richtest elfes
 printf $"{partTwoResult}"
