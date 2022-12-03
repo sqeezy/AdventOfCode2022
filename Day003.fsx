@@ -40,6 +40,17 @@ let partOne =
     >> List.map prio
     >> List.sum
 
+let partTwo =
+    List.ofArray
+    >> List.chunkBySize 3
+    >> List.map (List.map Set.ofSeq)
+    >> List.map intersect
+    >> List.map(List.ofSeq >> List.head >> prio)
+    >> List.sum
+
+
+
+
 let testLines =  @"vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -49,3 +60,5 @@ CrZsJsPPZsGzwwsLwLmpwMDw".Split(Environment.NewLine)
 
 printfn "Part One Test Result: %A" (partOne testLines)
 printfn "Part One Result: %A" (partOne lines)
+
+printfn "Part Two Result: %A" (partTwo lines)
