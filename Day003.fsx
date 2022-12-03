@@ -11,24 +11,34 @@ let prio c =
     else
         prioFromUpper c
 
+let intersect lists =
+    match lists with
+    | head :: tail -> 
+        tail
+        |> Set.ofSeq
+        |> Seq.map Set.ofSeq
+        |> Seq.fold (fun remain set -> Set.intersect remain set ) head
+    | [] -> Set.empty
+
 let splitLine (s: string) =
     let mid = s.Length / 2
-    s |> Seq.toArray |> Array.splitAt mid
-
-let overlap (left, right) =
-    Set.intersect (Set.ofSeq left) (Set.ofSeq right)
-    |> Set.toList
-    |> List.head
-
+    s 
+    |> Seq.toArray 
+    |> Array.splitAt mid
+    |> fun (a, b) -> [a;b]
 
 let path = $@"{__SOURCE_DIRECTORY__}\Day003.txt"
 let lines = System.IO.File.ReadAllLines path
 
 let partOne =
-    Array.map splitLine
-    >> Array.map overlap
-    >> Array.map prio
-    >> Array.sum
+    List.ofArray
+    >> List.map splitLine
+    >> List.map (List.map Set.ofSeq)
+    >> List.map intersect
+    >> List.map List.ofSeq
+    >> List.map List.head
+    >> List.map prio
+    >> List.sum
 
 let testLines =  @"vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
