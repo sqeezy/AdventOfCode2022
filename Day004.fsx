@@ -11,13 +11,13 @@ let splitAtDash (s:string) = s.Split('-')
 let rangePair (line: string array array) =
     let elfA = line.[0]
     let elfB = line.[1]
-    let toInts = Array.map (Int32.Parse) >> (fun arr -> (arr.[0], arr.[1]))
+    let toInts = Array.map Int32.Parse >> (fun arr -> (arr.[0], arr.[1]))
     (toInts elfA, toInts elfB)
 
 let includedInEachOther (a,b) =
     let rightIncludedInLeft left right =
         match left,right with
-        | ((aLow, aHigh),(bLow, bHigh)) when (aLow <= bLow) && (aHigh >= bHigh) -> true
+        | (aLow, aHigh),(bLow, bHigh) when (aLow <= bLow) && (aHigh >= bHigh) -> true
         | _ -> false
     rightIncludedInLeft a b || (rightIncludedInLeft b a)
 
@@ -48,8 +48,8 @@ let testInput =  @"2-4,6-8
 
 let testLines = testInput |> splitAtNewLine
 
-printfn "Part One Test Result: %A" (partOne testLines)
-printfn "Part One Result: %A" (partOne lines)
+printfn $"Part One Test Result: {partOne testLines}"
+printfn $"Part One Result: {partOne lines}"
 
-printfn "Part One Test Result: %A" (partTwo testLines)
-printfn "Part Two Result: %A" (partTwo lines)
+printfn $"Part One Test Result: {partTwo testLines}"
+printfn $"Part Two Result: {partTwo lines}"
