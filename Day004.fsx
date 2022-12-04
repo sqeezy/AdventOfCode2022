@@ -28,21 +28,16 @@ let overlap (a,b) =
         | _ -> false
     rightOverlappingLeft a b || (rightOverlappingLeft b a)
 
-let partOne =
+let part overlapCriteria =
     Array.map splitAtComma
     >> Array.map (Array.map splitAtDash)
     >> Array.map rangePair
-    >> Array.map includedInEachOther
+    >> Array.map overlapCriteria
     >> Array.filter id
     >> Array.length
 
-let partTwo =
-    Array.map splitAtComma
-    >> Array.map (Array.map splitAtDash)
-    >> Array.map rangePair
-    >> Array.map overlap
-    >> Array.filter id
-    >> Array.length
+let partOne = part includedInEachOther
+let partTwo = part overlap
 
 let testInput =  @"2-4,6-8
 2-3,4-5
