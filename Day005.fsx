@@ -8,8 +8,9 @@ let splitAtNewLine (s:string) = s.Split(Environment.NewLine)
 
 let partOne lines =
     let (upper,lower) = lines |> Array.splitAt (lines |> Array.findIndex((=) ""))
-    let initialSetup =
-     1
+    let initialSetup rawInput =
+     let input = Array.truncate ((Array.length rawInput) - 1) rawInput 
+     0
     0
 
 let partTwo = ignore
