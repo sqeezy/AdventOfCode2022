@@ -25,4 +25,4 @@ line |> partOne // should be 1707
 
 "mjqjpqmgbljsphdztnvjfqwrcgsmlb" |> partTwo // should be 19
 "bvwbjplbgvbhsrlpgdmjqwftvncz" |> partTwo // should be 23
-line |> partTwo
+line |> partTwo // should be 3697
