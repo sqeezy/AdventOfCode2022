@@ -32,7 +32,6 @@ $ ls
 let path = $@"{__SOURCE_DIRECTORY__}\Day007.txt"
 let lines = System.IO.File.ReadAllLines path
 
-
 type Tree =
     | File of (string * int)
     | Folder of (string * Tree seq)
@@ -59,12 +58,30 @@ module Tree =
             // ... and return it
             finalAccum
 
+    let rec traverse tree = 
+        let recurse = traverse
+        match tree with
+        | File (name, size) ->
+            name, size, []
+        | Folder (nodeInfo,subtrees) ->
+            let traversal = subtrees |> Seq.map recurse
+            let sumSize = traversal |> Seq.sumBy (fun (_, size, _) -> size)
+            let acc = traversal |> Seq.collect (fun (_, _, acc) -> acc) |> List.ofSeq
+            nodeInfo, sumSize, (nodeInfo, sumSize) :: acc
+
 let smallTree = Folder("/", seq {File("boot.txt", 100); Folder("usr", seq {File("mng.txt", 150)})})
 
 Tree.cata 
     (fun (name, size) -> (name, size))
     (fun name sub -> (name, Seq.sum (sub|>Seq.map snd)))
      smallTree
+
+Tree.traverse smallTree
+
+// Tree.fold
+//     (fun (name, size) -> (name, size))
+//     (fun name sub -> (name, Seq.sum (sub|>Seq.map snd)))
+//      smallTree
 
 let partOne = ignore
 let partTwo = ignore
