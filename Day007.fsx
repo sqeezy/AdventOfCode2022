@@ -3,6 +3,8 @@
 // https://fsharpforfunandprofit.com/posts/recursive-types-and-folds-3b/
 
 open System
+open System.Collections.Generic
+open System.IO
 
 let testLines = 
     @"$ cd /
@@ -29,88 +31,41 @@ $ ls
 5626152 d.ext
 7214296 k".Split('\n')
 
-let (|Prefix|_|) (p:string) (s:string) =
-    if s.StartsWith(p) then
-        Some(s.Substring(p.Length))
-    else
-        None
-
-type Command =
-    | Cd of string
-    | Ls
-
-type Entry =
-    | Folder of string
-    | File of (string * int)
-
-type Line =
-    | Command of Command
-    | Entry of Entry
-
-module Command =
-    let parse (s : string) =
-        match s with
-        | Prefix "$ cd " rest -> Command (Cd rest)
-        | Prefix "$ ls" rest -> Command (Ls)
-        | Prefix "dir " rest -> Entry (Folder rest)
-        | _ -> 
-            let parts = s.Split(' ')
-            Entry (File (parts[1], Int32.Parse parts[0]))
-
-
 let path = $@"{__SOURCE_DIRECTORY__}\Day007.txt"
-let lines = System.IO.File.ReadAllLines path
+let lines = new Queue<string>(System.IO.File.ReadAllLines path |> Array.skip 1 |> Array.filter (fun l -> l[0..3] <> "$ ls"))
 
-type Tree =
-    | File of (string * int)
-    | Folder of (string * Tree seq)
+type Folder = { mutable Size:int; mutable Folders:string list }
 
-module Tree =
-    let rec cata fLeaf fNode tree =
-        let recurse = cata fLeaf fNode
-        match tree with
-        | File leafInfo ->
-            fLeaf leafInfo
-        | Folder (nodeInfo,subtrees) ->
-            fNode nodeInfo (subtrees |> Seq.map recurse)
+let folders = new Stack<Folder>()
+let mutable visited = List.empty
+let root = { Size=0; Folders=List.empty }
+folders.Push(root)
 
-    let rec fold fLeaf fNode acc tree =
-        let recurse = fold fLeaf fNode
-        match tree with
-        | File leafInfo ->
-            fLeaf acc leafInfo
-        | Folder (nodeInfo,subtrees) ->
-            // determine the local accumulator at this level
-            let localAccum = fNode acc nodeInfo
-            // thread the local accumulator through all the subitems using Seq.fold
-            let finalAccum = subtrees |> Seq.fold recurse localAccum
-            // ... and return it
-            finalAccum
+while lines.Count > 0 do
+    let line = lines.Dequeue()
+    let pieces = line.Split(' ')
+    match pieces[0] with
+    | "dir" -> let n = folders.Peek()
+               folders.Peek().Folders <- pieces[1]::n.Folders
+    | "$" -> match pieces[2] with
+             | ".." -> visited <- folders.Pop()::visited
+                       folders.Peek().Size <- folders.Peek().Size + visited[0].Size
+             | _ -> folders.Push({ Size=0; Folders=List.empty})
+    | _ -> folders.Peek().Size <- folders.Peek().Size + (int <| pieces[0])
 
-    let rec traverse tree = 
-        let recurse = traverse
-        match tree with
-        | File (name, size) ->
-            name, size, []
-        | Folder (nodeInfo,subtrees) ->
-            let traversal = subtrees |> Seq.map recurse
-            let sumSize = traversal |> Seq.sumBy (fun (_, size, _) -> size)
-            let acc = traversal |> Seq.collect (fun (_, _, acc) -> acc) |> List.ofSeq
-            nodeInfo, sumSize, (nodeInfo, sumSize) :: acc
+let mutable total = 0
+while folders.Count > 1 do
+    let n = folders.Pop()
+    total <- total + n.Size
+    visited <- n::visited
+folders.Peek().Size <- folders.Peek().Size + total
+   
+let p1 = visited |> List.filter(fun f -> f.Size <= 100_000)
+                 |> List.sumBy(fun f -> f.Size)
+printfn $"P1: {p1}"
 
-let smallTree = Folder("/", seq {File("boot.txt", 100); Folder("usr", seq {File("mng.txt", 150)})})
-
-Tree.cata 
-    (fun (name, size) -> (name, size))
-    (fun name sub -> (name, Seq.sum (sub|>Seq.map snd)))
-     smallTree
-
-Tree.traverse smallTree
-
-// Tree.fold
-//     (fun (name, size) -> (name, size))
-//     (fun name sub -> (name, Seq.sum (sub|>Seq.map snd)))
-//      smallTree
-
-let partOne = ignore
-let partTwo = ignore
+let goal = 30_000_000
+let unused = 70_000_000 - folders.Peek().Size
+let sizes = visited |> List.map(fun f -> f.Size) |> List.sort
+let p2 = sizes |> List.find(fun s -> s + unused >= goal)
+printfn $"P2: {p2}"
