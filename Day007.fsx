@@ -1,10 +1,6 @@
-// https://adventofcode.com/2022/day/4
-// https://fsharpforfunandprofit.com/posts/recursive-types-and-folds/#basic-recursive-type
-// https://fsharpforfunandprofit.com/posts/recursive-types-and-folds-3b/
+// https://adventofcode.com/2022/day/7
 
-open System
 open System.Collections.Generic
-open System.IO
 
 let testLines = 
     @"$ cd /
