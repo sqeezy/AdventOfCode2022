@@ -29,6 +29,35 @@ $ ls
 5626152 d.ext
 7214296 k".Split('\n')
 
+let (|Prefix|_|) (p:string) (s:string) =
+    if s.StartsWith(p) then
+        Some(s.Substring(p.Length))
+    else
+        None
+
+type Command =
+    | Cd of string
+    | Ls
+
+type Entry =
+    | Folder of string
+    | File of (string * int)
+
+type Line =
+    | Command of Command
+    | Entry of Entry
+
+module Command =
+    let parse (s : string) =
+        match s with
+        | Prefix "$ cd " rest -> Command (Cd rest)
+        | Prefix "$ ls" rest -> Command (Ls)
+        | Prefix "dir " rest -> Entry (Folder rest)
+        | _ -> 
+            let parts = s.Split(' ')
+            Entry (File (parts[1], Int32.Parse parts[0]))
+
+
 let path = $@"{__SOURCE_DIRECTORY__}\Day007.txt"
 let lines = System.IO.File.ReadAllLines path
 
